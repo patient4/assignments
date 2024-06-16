@@ -10,8 +10,25 @@ const app = express();
 // User will be sending in their user id in the header as 'user-id'
 // You have been given a numberOfRequestsForUser object to start off with which
 // clears every one second
-
+//middlewares
 let numberOfRequestsForUser = {};
+function rateLimit(req, res, next){
+  const user = req.headers['user-id'];
+  if(numberOfRequestsForUser[user]){
+    numberOfRequestsForUser[user]+=1;
+    if(numberOfRequestsForUser[user]> 5){
+      res.status(404).send();
+    }
+    else{
+      next();
+    }
+  }
+  else{
+    numberOfRequestsForUser[user] = 1;
+    next();
+  }
+}
+app.use(rateLimit);
 setInterval(() => {
     numberOfRequestsForUser = {};
 }, 1000)
